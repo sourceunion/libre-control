@@ -1,39 +1,41 @@
 # LibreControl
 
-Um framework open-source de Command & Control projetado para a sala de aula, não para o campo de batalha — desmistificando a orquestração de adversários, um pacote por vez.
+O **LibreControl** constitui um framework de Comando e Controle (C2) de código aberto, desenvolvido especificamente para ambientes acadêmicos e laboratoriais. O projeto visa elucidar os mecanismos de orquestração adversária através de uma abordagem modular e transparente, dissociando-se de ferramentas destinadas a operações de campo (Red Teaming operacional) em favor da clareza didática.
 
-> **Aviso**: O LibreControl é estritamente para uso educacional e pesquisa de segurança autorizada. Os autores não são responsáveis por uso indevido. Não utilize este software em redes que você não possui ou para as quais não tenha permissão explícita de teste.
+> [!WARNING]
+> **Aviso Legal**: Este software destina-se estritamente a fins educacionais e à pesquisa de segurança autorizada. Os desenvolvedores declinam de qualquer responsabilidade decorrente da utilização indevida desta ferramenta. A execução do LibreControl é vedada em redes ou sistemas para os quais o operador não detenha propriedade ou autorização explícita e documentada para testes de intrusão.
 
 ## A Filosofia
 
-Segurança muitas vezes é ensinada de forma abstrata, mas adversários operam de forma concreta. O **LibreControl** existe para quebrar essa opacidade.
+O ensino de segurança da informação frequentemente carece de demonstrações práticas sobre a infraestrutura operacional de ameaças persistentes. O **LibreControl** foi concebido para mitigar essa lacuna de conhecimento, proporcionando visibilidade sobre a mecânica interna de ataques cibernéticos.
 
-> Não estamos construindo uma arma; estamos construindo uma janela.
+Ao contrário de frameworks C2 convencionais, que priorizam a furtividade e a velocidade de operação, esta plataforma prioriza a **inteligibilidade do código e a compreensão sistêmica**. O projeto remove camadas de ofuscação desnecessárias para expor os princípios fundamentais de orquestração, evasão de perímetro e persistência sistêmica. A premissa central postula que a defesa eficaz de infraestruturas críticas requer um entendimento profundo das táticas ofensivas subjacentes.
 
-Frameworks C2 existentes são projetados para furtividade e velocidade. Este projeto foi projetado para **legibilidade e compreensão**. Nós removemos a obfuscação para revelar a mecânica bruta da orquestração, evasão e persistência.
-
-> Para entender a sombra, você deve primeiro entender a luz que a projeta.
+> _"Para entender a sombra, você deve primeiro entender a luz que a projeta."_
 
 ## Como Funciona
 
 O LibreControl disseca a anatomia de um ataque em seus componentes atômicos. Ele fornece um laboratório seguro e isolado para observar como agentes se comunicam, como comandos são organizados e como a persistência é mantida.
 
-### Pilares Centrais
+### Pilares Arquiteturais
 
-* **O Sistema Nervoso (Canais)**: Explore como os dados se movem. Implementamos protocolos de comunicação modulares (HTTP/S, DNS, SMB, etc.) para demonstrar como o tráfego se mistura ao ruído normal da rede.
-* **A Camuflagem (Evasão)**: Um estudo sobre “Evasão de Defesa”. Veja como assinaturas são mascaradas e como análises heurísticas são contornadas.
-* **A Âncora (Persistência)**: Mecanismos que garantem que o agente sobreviva a reinicializações e tentativas de correção, demonstrando a resiliência das ameaças modernas.
+- **Protocolos de Comunicação e Transporte**: Análise do fluxo de dados em redes hostis. O sistema implementa canais de comunicação modulares (HTTP/S, DNS, SMB) para demonstrar técnicas de tunelamento e a fusão de tráfego malicioso com o ruído de rede legítimo.
+- **Técnicas de Evasão de Defesa**: Exame prático de métodos de contorno de segurança. O módulo explora como assinaturas digitais são mascaradas e como mecanismos de detecção heurística podem ser evadidos.
+- **Mecanismos de Persistência**: Estudo de métodos que asseguram a continuidade do acesso do agente após reinicializações do sistema ou tentativas de remediação, ilustrando a resiliência observada em vetores de ameaça modernos.
 
-### Arquitetura
+### Arquitetura e Documentação
 
-* **O Cérebro (Servidor)**: Responsável por gerenciar estado e agendar tarefas.
-* **As Mãos (Agente)**: O payload executado no alvo, responsável por realizar as instruções.
-* **O Listener**: A interface que conecta os dois, abstraindo o protocolo de comunicação.
+Para uma visão técnica aprofundada, consulte nossa documentação interna:
+
+- [**Arquitetura de Alto Nível**](ARCHITECTURE.md): O mapa completo da infraestrutura.
+- [**Microsserviços & Containers**](MICROSERVICES.md): Como escalamos ouvintes independentes.
+- [**Detalhamento dos Componentes**](COMPONENTS_EXPANDED.md): Especificações técnicas de cada peça.
+- [**Ciclo de Vida da Instrução**](LIFECYCLE_DEEP_DIVE.md): O fluxo de dados passo-a-passo.  
 
 ## Junte-se à Causa
 
 Este projeto pertence aos estudantes, pesquisadores e curiosos.
 
-* **Leia o Código**: Priorizamos comentários claros em vez de hacks engenhosos.
-* **Quebre o Código**: Encontre falhas na nossa lógica de evasão e corrija-as.
-* **Contribua**: Envie um PR com um novo canal de comunicação ou um método de persistência.
+1. **Leia o Código**: Priorizamos comentários claros em vez de hacks engenhosos.
+2. **Quebre o Código**: Encontre falhas na nossa lógica de evasão e corrija-as.
+3. **Contribua**: Envie um PR com um novo canal de comunicação ou um método de persistência.
