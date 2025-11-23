@@ -5,7 +5,8 @@ This document establishes the mandatory security protocols for the deployment an
 1. **Inbound Risk**: The C2 infrastructure itself is a high-value target for rival threat actors or counter-intelligence operations. Vulnerabilities here can lead to the operator's compromise.
 2. **Outbound Risk**: Operational mistakes can lead to legal liability, attribution, or unintended damage to target infrastructure.
 
-This framework is provided "as-is" for educational purposes. The safeguards described herein are the sole responsibility of the operator.
+> [!NOTE]
+> This framework is provided "as-is" for educational purposes. The safeguards described herein are the sole responsibility of the operator.
 
 ## Infrastructure Security (AppSec & NetSec)
 
@@ -23,13 +24,14 @@ The **Team Server** and **Database** reside in a trusted zone. They **MUST NOT**
 The framework utilizes cryptographic secrets for authentication and encryption.
 
 - **JWT Secret**: The environment variable `JWT_SECRET` in `docker-compose.yml` defaults to a placeholder. **CRITICAL**: Change this before first launch. Failure to do so allows any attacker to forge a token and take full control of your C2.
-- **Database Credentials**: The PostgreSQL password must be strong (minimum 20 characters, high entropy).
+- **Database Credentials**: The DBMS password must be strong (minimum 20 characters, high entropy).
 
 ### Input Sanitization & RCE
 
 While LibreControl implements input validation, C2 servers are historically vulnerable to "Hot Patching" attacks where a malicious Agent sends a malformed response to exploit the Server.
 
-- **Rule**: Treat all data coming from the Agent as **Untrusted Input**. The parsing logic in `internal/listener` is the primary attack surface.
+> [!NOTE]
+> Treat all data coming from the Agent as **Untrusted Input**. The parsing logic in `internal/listener` is the primary attack surface.
 
 ## Cryptographic Hygiene
 
@@ -59,12 +61,12 @@ The security of the communications depends entirely on the secrecy of the crypto
 
 ## Legal Boundaries & Ethics
 
-> [!WARNING]
-> VIOLATION OF THESE PARAMETERS MAY CONSTITUTE A CRIMINAL OFFENSE.
-
 1. **Authorization**: You must possess written, signed authorization (Scope of Work) from the owner of the target infrastructure before deploying an Agent.
 2. **Scope Creep**: Do not pivot to networks or systems outside the agreed scope, even if they are accessible from the compromised host.
 3. **Data Privacy**: Avoid exfiltrating PII (Personally Identifiable Information) unless explicitly required by the engagement objectives. If PII is inadvertently captured (e.g., in a screenshot), it must be securely deleted immediately.
+
+> [!CAUTION]
+> Violation of these parameters may constitute a criminal offense.
 
 ## Incident Response (Self-Compromise)
 

@@ -1,9 +1,9 @@
 # Shared Listener Logic
 
-This package contains the reusable core logic for network communication, preventing code duplication across different Listener implementations (HTTP, DNS, SMB).
-
 > [!NOTE]
 > **DRY (Don't Repeat Yourself)**. If logic regarding how to validate an Agent ID is used by both HTTP and DNS listeners, it belongs here, not in the `cmd` folders.
+
+This package contains the reusable core logic for network communication, preventing code duplication across different Listener implementations (HTTP, DNS, SMB).
 
 ## Purpose
 

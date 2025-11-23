@@ -1,5 +1,8 @@
 # Cryptographic Primitives
 
+> [!CAUTION]
+> Do not roll your own crypto. This package wraps standard library implementations (`golang.org/x/crypto`) to enforce specific parameters. Do not modify the curve parameters or nonce generation logic without rigorous review.
+
 This package implements the secure channel protocols for LibreControl. It provides the mathematical foundation for confidentiality and integrity.
 
 ## Standards
@@ -20,5 +23,3 @@ This package implements the secure channel protocols for LibreControl. It provid
 ### Security Guarantee
 
 This implementation aims for **Perfect Forward Secrecy (PFS)** per session. The compromise of a session key exposes only that specific session's traffic, not historical data.
-
-> **WARNING**: Do not roll your own crypto. This package wraps standard library implementations (`golang.org/x/crypto`) to enforce specific parameters. Do not modify the curve parameters or nonce generation logic without rigorous review.

@@ -31,7 +31,7 @@ For an in-depth technical view, consult our internal documentation:
 - [**Microservices & Containers**](docs/MICROSERVICES.md): How we scale independent listeners.
 - [**Component Details**](docs/COMPONENTS_EXPANDED.md): Technical specifications of each piece.
 - [**Instruction Lifecycle Deep Dive**](docs/LIFECYCLE_DEEP_DIVE.md): The step-by-step data flow.
-- [**Security Guidelines**](docs/SECURITY_GUIDE.md): Best practices for secure development and deployment.
+- [**Risk Assessment**](docs/RISK_ASSESSMENT.md): Best practices for secure development and deployment.
 
 ## Join the Cause
 
