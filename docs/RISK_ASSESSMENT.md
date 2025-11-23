@@ -5,7 +5,7 @@ This document establishes the mandatory security protocols for the deployment an
 1. **Inbound Risk**: The C2 infrastructure itself is a high-value target for rival threat actors or counter-intelligence operations. Vulnerabilities here can lead to the operator's compromise.
 2. **Outbound Risk**: Operational mistakes can lead to legal liability, attribution, or unintended damage to target infrastructure.
 
-> [!NOTE]
+> [!WARNING]
 > This framework is provided "as-is" for educational purposes. The safeguards described herein are the sole responsibility of the operator.
 
 ## Infrastructure Security (AppSec & NetSec)
