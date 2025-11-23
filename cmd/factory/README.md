@@ -8,7 +8,7 @@ The Factory listens to the Message Broker for build requests (`build_queue`). Wh
 
 1. **Configures**: Reads the requested parameters (Target OS, C2 Protocol, Encryption Keys).
 2. **Compiles**: Invokes the Go Toolchain to cross-compile the `cmd/agent` source code.
-3. **Obfuscates**: (Future) Applies AST manipulation to alter the binary signature.
+3. **Obfuscates**: Applies AST manipulation to alter the binary signature.
 4. **Publishes**: Returns the finished binary artifact via the Broker.
 
 ## Environment Requirements

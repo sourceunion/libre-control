@@ -1,6 +1,6 @@
 # System Architecture
 
-**LibreControl** adopts a modular architecture based on simplified microservices. Its goal is to decouple management logic (Team Server) from communication logic (Listeners), allowing students to analyze each component in isolation.
+**LibreControl** adopts a modular architecture based on simplified microservices. Its goal is to decouple management logic (Team Server) from communication logic (Listeners and Redirectors).
 
 > "The anatomy of a C2 is not just about control; it's about translating intent into action through hostile channels."
 
@@ -22,16 +22,15 @@ flowchart TD
     end
 
     subgraph "C2 Infrastructure<br>(Server-Side)"
-        
         subgraph "Management & Persistence"
             API["⚙️ Management Core<br>(Orchestrator)"]:::infra
-            DB[("🗄️ Data Repository<br>(State & Logs)")]:::infra
+            DB[("🗄️ Cryptographic Ledger<br>(HMAC Chained Logs)")]:::infra
             Factory["🛠️ Build Subsystem<br>(Artifact Generation)"]:::infra
         end
 
         %% Decoupling Component
         Broker{{"⚡ Event Bus<br>(Message Broker)"}}:::broker
-
+		
         subgraph "Edge Layer (Listeners)"
             L_Web["👂 Web Listener<br>(HTTP/S Traffic)"]:::infra
             L_Name["👂 Name Listener<br>(DNS Traffic)"]:::infra
@@ -49,24 +48,24 @@ flowchart TD
 
     %% Control Flow
     Operator -->|Secure Channel| UI
-    UI -->|Internal API| API
+    UI -->|"Internal API"| API
     API <--> DB
     
     %% Integration via Bus (Pub/Sub)
-    API <==>|Commands & Auditing| Broker
-    Factory <==>|Build Requests| Broker
+    API <==>|"Commands & Auditing"| Broker
+    Factory <==>|"Build Requests"| Broker
     
-    Broker <==>|Task Queue| L_Web
-    Broker <==>|Task Queue| L_Name
-    Broker <==>|Task Queue| L_File
+    Broker <==>|"Task Queue"| L_Web
+    Broker <==>|"Task Queue"| L_Name
+    Broker <==>|"Task Queue"| L_File
 
     %% External Communication
-    Agent <-->|C2 Channel| Redir
-    Redir <-->|Forwarding| L_Web
+    Agent <-->|"C2 Channel (ECDHE)"| Redir
+    Redir <-->|"Forwarding"| L_Web
     
     %% Telemetry
-    Agent -.->|Behavior| Sensor
-    L_Web -.->|Traffic Logs| Broker
+    Agent -.->|"Behavior"| Sensor
+    L_Web -.->|"Traffic Logs"| Broker
 ```
 
 Resilience in distributed systems is based on the principle that failures in peripheral components should not compromise the integrity of the operational core. The proposed architecture mitigates risks through functional isolation.
@@ -75,68 +74,62 @@ Resilience in distributed systems is based on the principle that failures in per
 
 > "The robustness of an offensive system lies in its ability to hide operational complexity behind simple interfaces, ensuring infrastructure survival even in hostile environments."
 
-**LibreControl**’s architecture transcends mere remote command execution. It uses event-driven microservices to simulate resilience, stealth, and flexibility found in Advanced Persistent Threats (APTs). This approach modernizes control infrastructure and provides students with a realistic model of how criminal and state actors operate resilient botnet networks. This section details the technical specifications and design rationale for each subsystem.
+**LibreControl**'s architecture uses event-driven microservices to simulate resilience, stealth, and flexibility found in Advanced Persistent Threats (APTs). This section details the technical specifications and design rationale for each subsystem.
 
 ### Agent (Implant / Payload): Execution and Persistence Vector
 
-The Agent is the software artifact deployed on the compromised endpoint. Unlike traditional remote administration tools (RATs) or IT support tools, the C2 agent is designed for hostile environments, assuming constant monitoring by EDR solutions and security analysts.
+The Agent is the software artifact deployed on the compromised endpoint. Unlike traditional remote administration tools (RATs), the C2 agent is designed for hostile environments, assuming constant monitoring by EDR solutions and security analysts.
 
 #### Functional Responsibilities
 
-* **Asynchronous Communication (Beaconing):** Avoids persistent connections and uses intermittent polling with **jitter** to obscure traffic patterns.
-* **Modular Command Execution:** Supports shell execution and in-memory execution to evade disk-based detection.
-* **Failover Mechanisms:** Implements dead-man’s switches and multi-protocol fallback to survive listener disruptions.
+- **Asynchronous Communication (Beaconing)**: Avoids persistent connections and uses intermittent polling.
+- **Modular Command Execution**: Executes tasks in-memory or via the shell to reduce disk footprint and evade detection, allowing flexible execution of scripts, binaries, or custom routines without leaving artifacts.
+- **Failover Mechanisms**: Uses multi-protocol fallback and dead-man switches to maintain resilience against listener disruptions, automatically switching channels and retrying connections to ensure continued operation.
+- **Forward Secrecy**: Generates ephemeral keys for every session. Static keys are used **only** for authentication, ensuring that the compromise of the server does not decrypt historical traffic.
+- **Replay Protection**: Implements a **Monotonic Counter** in the protocol header. The agent discards any task with an ID $\le$ the last executed task, neutralizing packet replay attacks.
 
-#### Decoupling Justification
-
-* **OpSec (Operational Security):** Agent only contains the server’s public key; captured binaries cannot decrypt prior traffic.
-* **Signature Evasion:** Small, modular agent cores enable obfuscation and packing to evade static detection.
-
-### Listeners (Communication Interfaces): Abstraction Layer
+### Listeners (Communication Interfaces)
 
 Listeners decouple control logic (what to do) from the transport (how to deliver), masking traffic and sanitizing input.
 
 #### Functional Responsibilities
 
-* **Traffic Masking (Malleable Profiles):** Mimics legitimate network traffic to evade detection.
-* **Normalization and Deserialization:** Converts raw packets into a structured format for the Core.
-* **Stateless Forwarding:** Passes data to the Broker without maintaining agent context.
+- **Traffic Masking (Malleable Profiles)**: Mimics legitimate network traffic to evade detection.
+- **Strict Deserialization**: Implements rigid schema validation (Protobuf) to prevent "Hot Patching" or memory corruption attacks from malicious agents.
+- **Stateless Forwarding**: Passes data to the Broker without maintaining agent context.
+- **Failure Isolation:** Containerized listeners ensure edge vulnerabilities do not compromise the core.
 
-#### Architectural Resilience
+### Message Broker (Orchestration)
 
-* **Failure Isolation:** Containerized listeners ensure edge vulnerabilities do not compromise the core.
-
-### Message Broker: Central Nervous System (Orchestration)
-
-Enables asynchronous, distributed, and scalable operations using technologies like Redis or RabbitMQ.
+Enables asynchronous, distributed, and scalable operations using technologies such as Redis or RabbitMQ, acting as the core hub for task distribution, service coordination, and event-driven orchestration across the system.
 
 #### Functional Responsibilities
 
-* **Queue Management:** Buffers tasks during core downtime and prioritizes traffic.
-* **Pub/Sub Pattern:** Allows pluggable, extensible microservices.
-* **Polyglot Interoperability:** Supports multi-language development across components.
+- **Queue Management**: Buffers tasks during service downtime, enforces prioritization, and ensures reliable delivery under high load conditions, preventing task loss and enabling smooth system operation during spikes or temporary outages.
+- **Pub/Sub Pattern**: Facilitates loosely coupled, pluggable microservices that can subscribe to events, trigger workflows, and extend functionality without modifying core logic, supporting dynamic scaling and modular feature development.
+- **Polyglot Interoperability**: Provides seamless integration for components developed in multiple programming languages, enabling cross-platform compatibility, flexible deployment, and easier collaboration between diverse development teams.
 
-### Team Server Core: Intelligence and Cryptography
+### Team Server Core
 
-Central authority and sole “source of truth,” protected in the most secure infrastructure zone.
+Serves as the central authority and sole "source of truth," secured within the trusted infrastructure zone, responsible for managing agent operations, cryptographic protocols, and task orchestration.
 
 #### Functional Responsibilities
 
-* **State & Session Management:** Tracks agent status and operational metadata.
-* **Encryption:** Maintains asymmetric and symmetric keys for secure end-to-end communication.
-* **Tasking Logic:** Converts operator intent into agent-specific opcodes.
-
-### Payload Factory: Automated Artifact Generation
-
-Generates agents on-demand with dynamic configuration, obfuscation, and isolated resource management.
+- **State & Session Management**: Continuously tracks agent status, operational metadata, and connectivity health, ensuring accurate session persistence and enabling responsive system monitoring.
+- **Cryptographic Enforcement**: Manages ephemeral key exchanges, enforces forward secrecy, and validates HMAC signatures to guarantee message integrity and prevent tampering or replay attacks.
+- **Tasking Logic**: Translates operator instructions into agent-specific opcodes, handles prioritization, and schedules execution to maintain reliable and flexible operational control across the environment.
 
 ### Database: Persistence, History, and Auditing
 
-Stores operation state, audit trails, and enables operational replay for Red Team exercises.
+Provides secure storage for operational state, historical data, and comprehensive audit trails, enabling reliable tracking and post-incident analysis.
 
-### Frontend / Console: Command & Control Interface
+#### Functional Responsibilities
 
-Provides a unified “single pane of glass” for human operators with multi-user collaboration, data visualization, and RBAC enforcement.
+- **Tamper-Evident Logging**: Implements an **HMAC Chain** for the audit log, where each entry’s hash depends on the previous entry ($Hash_N = SHA256(Hash_{N-1} + Data)$). This design ensures that any modification, deletion, or insertion — even by a root user — breaks the cryptographic chain, providing verifiable integrity for all historical records.
+- **Encrypted Storage**: All stored data, including agent state and audit logs, is encrypted at rest using strong symmetric cryptography, protecting sensitive operational information from unauthorized access.
+- **Access Control & Segmentation**: Implements strict role-based access controls and database segmentation to minimize exposure, enforce least privilege, and prevent lateral movement in case of compromise.
+- **Replication & Redundancy**: Supports real-time replication across multiple nodes or datacenters, ensuring high availability, fault tolerance, and data durability under network or hardware failures.
+- **Query Auditing & Monitoring**: Logs all database queries and changes, allowing operators to detect unusual patterns, investigate incidents, and maintain compliance with security policies.
 
 ## Command Execution Pipeline
 
@@ -150,7 +143,7 @@ sequenceDiagram
         actor Op as 🧑‍💻 Operator
         participant UI as 🖥️ Frontend
         participant Core as 🧠 Team Server
-        participant DB as 🗄️ Database
+        participant DB as 🗄️ Ledger (DB)
         participant Broker as ⚡ Message Broker
     end
     
@@ -167,7 +160,7 @@ sequenceDiagram
     Op->>UI: Input: "shell whoami"
     UI->>Core: API Request (Queue Task)
     activate Core
-    Core->>DB: Persist Task (Status: Pending)
+    Core->>DB: Append Log (HMAC Signed)
     Core->>Broker: Publish Task (Topic: agent_id)
     deactivate Core
     
@@ -177,16 +170,17 @@ sequenceDiagram
     %% Sleep Loop (Jitter)
     Note right of Agent: Agent sleeps... (Jitter)
     
-    Agent->>List: Check-in (GET /login)
+    Agent->>List: Check-in (ECDH Handshake)
     activate List
     List->>Broker: Query pending tasks?
     Broker-->>List: Return encrypted task JSON
-    List-->>Agent: HTTP Response (Task Payload)
+    List-->>Agent: HTTP Response (Task Payload + Nonce)
     deactivate List
 
     %% PHASE 3: EXECUTION
     Note over Agent: 3. LOCAL EXECUTION
-    Agent->>Agent: Decrypt & Execute
+    Agent->>Agent: Verify Nonce (Replay Check)
+    Agent->>Agent: Decrypt (Ephemeral Key) & Execute
     Note right of Agent: Output: "nt authority\system"
 
     %% PHASE 4: REPORTING
@@ -199,7 +193,7 @@ sequenceDiagram
     
     Broker-->>Core: Consume Result
     activate Core
-    Core->>DB: Update Task (Status: Complete)
+    Core->>DB: Update Task & Chain Hash
     Core->>UI: WebSocket Push (Update View)
     deactivate Core
     
